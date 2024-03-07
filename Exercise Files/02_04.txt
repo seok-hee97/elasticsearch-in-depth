@@ -1,0 +1,65 @@
+DELETE bowled_over
+
+PUT bowled_over
+{
+  "mappings": {
+    "properties": {
+      "first_name": {
+        "type": "keyword"
+      },
+      "last_name": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+
+PUT bowled_over/_doc/1
+{
+   "first_name": "bob",
+   "last_name": "smith",
+   "average": 204.5
+}
+
+PUT bowled_over/_doc/2
+{
+   "first_name": "Edward",
+   "last_name": "capriolo",
+   "average": 192.4
+}
+
+GET /bowled_over/_search?q=edward
+
+GET /bowled_over/_search?q=Edward
+
+
+PUT bowled_over/_mapping
+{
+  
+    "properties": {
+      "first_name": {
+        "type": "keyword",
+        "copy_to": "monikers"
+      },
+      "last_name": {
+        "type": "keyword",
+        "copy_to": "monikers"
+      },
+      "monikers": {
+        "type": "text"
+      }
+    
+  }
+}
+
+GET bowled_over/_search
+{
+  "query": {
+     "match" : {
+       "monikers": {
+         "query": "capriola",
+         "fuzziness": 1
+       }
+      }
+   }
+}

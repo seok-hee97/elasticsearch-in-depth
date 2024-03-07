@@ -1,0 +1,118 @@
+
+DELETE no_source_example
+PUT no_source_example
+{
+  "mappings": {
+    "_source": {
+      "enabled": false
+    }
+  }
+}
+
+PUT /no_source_example/_doc/1
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+GET /no_source_example/_search
+{
+  "query": {
+    "term": {
+      "Author.keyword": {
+        "value": "Nathaniel Bowlmorn"
+      }
+    }
+  }
+}
+
+GET /no_source_example/_search
+{
+  "query": {
+    "term": {
+      "Author": {
+        "value": "Nathaniel Bowlmorn"
+      }
+    }
+  }
+}
+
+#user supplied id example
+DELETE bowled_over_artist_guild
+PUT /bowled_over_artist_guild/_doc/1
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+POST /bowled_over_artist_guild/_doc
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+POST /bowled_over_artist_guild/_doc
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+GET /bowled_over_artist_guild/rMeMQn8BcJaPLXo6Nk_X
+
+GET /bowled_over_artist_guild/_doc/rMeMQn8BcJaPLXo6Nk_X
+GET /bowled_over_artist_guild/_source/rMeMQn8BcJaPLXo6Nk_X
+
+# refresh settings
+PUT refresh_example
+PUT refresh_example/_settings
+{ 
+ "index" : {
+        "refresh_interval" : "30s"
+    }
+}
+
+PUT /refresh_example/_doc/1
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+
+GET /refresh_example/_doc/1
+
+GET /refresh_example/_search
+{
+  "query": { "match_all": {}}
+}
+
+

@@ -1,0 +1,68 @@
+DELETE bowled_over
+
+PUT bowled_over/_doc/1
+{
+  "first_name": "Edward",
+  "last_name": "Capriolo",
+  "average": 190.0
+}
+
+GET /bowled_over/_doc/1
+
+GET /bowled_over/_source/1
+
+
+PUT bowled_over/_doc/2
+{
+  "first_name": "Bob",
+  "last_name": "Smith",
+  "average": 204.5
+}
+
+DELETE bowled_over/_doc/2
+
+GET /bowled_over/_doc/2
+
+DELETE bowled_over/_doc/2
+
+
+POST bowled_over/_update/1
+{
+  "doc": {
+    "nickname": "lincoln"
+  }
+}
+
+GET /bowled_over/_source/1
+
+GET /bowled_over/_search?q=edwar*
+
+PUT bowled_over/_doc/2
+{
+  "first_name": "Bob",
+  "last_name": "Smith",
+  "average": 204.5
+}
+
+GET /bowled_over/_search?q=edwar*
+
+
+GET /bowled_over/_search?q=edwar*&filter_path=hits.hits._source
+
+GET /bowled_over/_search?q=average(>190 AND <200)&filter_path=hits.hits._source
+
+GET /bowled_over/_search
+{
+"query": {
+  "query_string": {
+     "query" : "average(>190 AND <200)"
+  }
+ }
+}
+
+{
+"query": {
+  "match_all": {}
+ }
+}
+

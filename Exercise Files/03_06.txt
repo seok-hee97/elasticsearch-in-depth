@@ -1,0 +1,68 @@
+
+DELETE bowled_over_artist_guild_*
+PUT /bowled_over_artist_guild_2020-01-01/_doc/1
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+PUT /bowled_over_artist_guild_2020-01-02/_doc/2
+{ 
+  "Author": "Whiph Onpin", 
+  "date" : "2020-01-02",
+  "title" : "o Captain, team captain",
+  "passage" : """O Captain! team captain! our painful season is done; 
+Our team has weather'd every split, the place we sought is won; 
+The bowling dinner is near, the awards I hear, the people all cheering, 
+"""   
+}
+
+GET bowled_over_artist_guild_2020-01-01,bowled_over_artist_guild_2020-01-02/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+
+POST _reindex
+{
+ "source": {
+    "index": "bowled_over_artist_guild_2020-01-01"
+  },
+  "dest": {
+    "index": "bowled_over_artist_guild_2020-01-01_a"
+  }
+}
+
+GET bowled_over_artist_guild_*/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+POST _aliases
+{
+  "actions": [
+    
+    {
+     "add": {
+        "index": "bowled_over_artist_guild_2020-01-01_a",
+        "alias": "bowled_over_artist_guild_2020-01-01"
+      }
+    },
+    {
+      "remove_index": {
+        
+        "index": "bowled_over_artist_guild_2020-01-01"
+      }
+    }
+  ]
+}

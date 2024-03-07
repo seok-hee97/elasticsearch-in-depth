@@ -1,0 +1,188 @@
+#This section will describe how to store index and search 
+#complex nested elements inside json documents
+# here we have modeled a document that tracks the scores of two 
+#teams bowling against each other. notice scores is an array of objects
+# each team has two bowlers who have bowled 2 games
+DELETE bowled_over_team_scores
+PUT /bowled_over_team_scores/_doc/1
+{ 
+  "league_name": "friday night lights", 
+  "date" : "2020-01-01",
+  "scores" : [
+     { 
+       "game": 1,
+       "team_name" : "strike force",
+       "bowler": "bob",
+       "score": 203
+     },
+     { 
+       "game": 2,
+       "team_name" : "strike force",
+       "bowler": "bob",
+       "score": 204
+     },
+     { 
+       "game": 1,
+       "team_name" : "strike force",
+       "bowler": "sara",
+       "score": 177
+     },
+     { "game": 2,
+       "team_name" : "strike force",
+       "bowler": "sara",
+       "score": 176
+     },
+     { 
+       "game": 1,
+       "team_name" : "bowling turkeys",    
+       "bowler": "john",
+       "score": 160
+     },
+     { 
+       "game": 2,
+       "team_name" : "bowling turkeys", 
+       "bowler": "john",
+       "score": 164
+     },
+     { 
+       "game": 1,
+       "team_name" : "bowling turkeys",    
+       "bowler": "ted",
+        "score": 121
+     },
+     { 
+       "game": 2,
+       "team_name" : "bowling turkeys", 
+       "bowler": "ted",
+        "score": 241
+     }
+  ]
+}             
+//get mapping
+# We inserted this document so elastic created the mapping for us dynamically
+# notice that for scores the mapping is not specifically define so it defaults 
+# to type object. This has implications when it comes to searching that we will see
+
+GET /bowled_over_team_scores/_mapping
+
+#Lets do a searach for a bowler named john on the strike force team
+#notice we found a match, but this means there is a document with
+# a bowler named john and a team named strike force.
+# but IMPORTANTLY this design using object doesnt allow us to match
+# only a team with a bowler named john
+#why
+GET bowled_over_team_scores/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "scores.team_name": "strike force" }},
+        { "match": { "scores.bowler":  "john" }}
+      ]
+    }
+  }
+}
+
+GET bowled_over_team_scores/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "scores.team_name": "strike force" }},
+        { "match": { "scores.bowler":  "j" }}
+      ]
+    }
+  }
+}
+#lets delete the index and recreate it using the nested 
+#type instead of the object type for the scroes array
+# internally what this does is each nested object becomes an internal document
+# linked to the parent document
+DELETE bowled_over_team_scores
+
+PUT bowled_over_team_scores
+{
+  
+    "mappings" : {
+      "properties" : {
+        "date" : {
+          "type" : "date"
+        },
+        "league_name" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "scores" : {
+          "type": "nested",
+          "properties" : {
+            "bowler" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            },
+            "game" : {
+              "type" : "long"
+            },
+            "score" : {
+              "type" : "long"
+            },
+            "team_name" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+# Now we can use a special query type named nested which searches across
+# nested documents this matches a single score with the criteria
+GET bowled_over_team_scores/_search
+{
+  "query": {
+  "nested": {
+    "path": "scores",
+      "query": {
+        "bool": {
+          "must": [
+            { "match": { "scores.team_name": "strike force" }},
+            { "match": { "scores.bowler":  "bob" }}
+          ]
+        }
+      }
+    }
+  }
+}
+
+# this search doesn not match because a single element in the array does not match 
+GET bowled_over_team_scores/_search
+{
+  "query": {
+  "nested": {
+    "path": "scores",
+      "query": {
+        "bool": {
+          "must": [
+            { "match": { "scores.team_name": "strike force" }},
+            { "match": { "scores.bowler":  "john" }}
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,165 @@
+DELETE bowled_over_artist_guild
+PUT /bowled_over_artist_guild/_doc/1
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+PUT /bowled_over_artist_guild/_doc/2
+{ 
+  "Author": "Whiph Onpin", 
+  "date" : "2020-01-02",
+  "title" : "o Captain, team captain",
+  "passage" : """O Captain! team captain! our painful season is done; 
+Our team has weather'd every split, the place we sought is won; 
+The bowling dinner is near, the awards I hear, the people all cheering, 
+"""   
+}
+
+GET /bowled_over_artist_guild/_mapping
+GET bowled_over_artist_guild/_search
+{
+  "query": { 
+    "match_all": {}
+  }
+}
+
+# term queries work only on "keyword"
+GET /bowled_over_artist_guild/_search
+{
+  "query": {
+    "term": { 
+      "Author": { 
+        "value": "Nathaniel Bowlmorn"
+      }
+    }
+  }
+}
+
+# notice there is no score here
+GET /bowled_over_artist_guild/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": { 
+            "Author.keyword": "Nathaniel Bowlmorn"
+          }
+        }
+      ]
+    }
+  }
+}
+ 
+# the score for second is lower as only one matches
+GET /bowled_over_artist_guild/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": { 
+            "passage": {
+              "query": "bowl",
+              "boost": 1.8
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# the score for second is lower as only one matches
+GET /bowled_over_artist_guild/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": { 
+            "passage": "I"
+          },
+          "match": { 
+            "passage": {
+              "query": "bowl",
+              "boost": 1.8
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+# If you know the front half of a keyword you can use a 
+# prefix query
+GET /bowled_over_artist_guild/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": { 
+            "field": "Author"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# boolean can be nested
+GET /bowled_over_artist_guild/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "bool": { 
+            "must": [
+              {
+                "match": { 
+                  "title": "last"
+                }
+              }
+            ]
+          }
+        }, 
+        {
+          "fuzzy": { 
+            "Author": { 
+              "value": "iel"
+            }
+          }
+        }
+      ]
+    } 
+  }
+}
+
+GET /bowled_over_artist_guild/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_all": {}}
+      ],
+      "filter": [
+        {
+          "term": { 
+            "date": "2020-01-02"
+          }
+        }
+      ]
+    }
+  }
+}

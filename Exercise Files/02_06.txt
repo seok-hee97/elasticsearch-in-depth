@@ -1,0 +1,108 @@
+#This section demonstrates the flattened data type, this type is best used for documents that have a large number of unknown fields
+
+# to illustrate when this feature is useful image our social network boled over starts distributing an app to employees that
+# allows them to send notes to each other. The notes are defined as documents with arbitrary fields and values. 
+
+#Lets create a few notes that users will send to each other 
+
+DELETE bowled_over_notes
+PUT /bowled_over_notes/_doc/1
+{ 
+  "from": "ted", 
+  "date" : "2020-01-01",
+  "message" : "Dont forget to fix the pinsetter on lane 2"   
+} 
+
+PUT /bowled_over_notes/_doc/2
+{ 
+  "from": "ted",
+  "to": "mindy", 
+  "date" : "2020-01-02",
+  "order" : "1 new pinsetters"   
+}             
+
+PUT /bowled_over_notes/_doc/3
+{ 
+  "from": "mindy",
+  "to": "mindy", 
+  "date" : "2020-01-03",
+  "reminder" : "find new investors",
+  "why": "operational costs higher due to overwhelming successed of bowled_over social network. equipment mean tme to failuer is higher"   
+}
+
+#lets take a look at the mapping discuss mapping explosion here
+
+GET /bowled_over_notes/_mapping
+
+
+
+
+DELETE bowled_over_notes    
+
+# decribe moving a few fields to defined high level objects nad introducing the unstrutored flattened field        
+PUT /bowled_over_notes
+{
+"mappings" : {
+"dynamic": "strict",
+      "properties" : {
+        "date" : {
+          "type" : "date"
+        },
+        "from" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "to" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "unstructured": {
+          "type": "flattened"
+      	}
+      }
+    }
+  }
+
+
+
+
+PUT /bowled_over_notes/_doc/3
+{ 
+  "from": "mindy",
+  "to": "mindy", 
+  "date" : "2020-01-03",
+  "unstructured" : {
+    "reminder" : "find new investors",
+    "why": "operational costs higher due to overwhelming successed of bowled_over social network. equipment mean tme to failuer is higher"   
+  }
+}
+
+
+GET /bowled_over_notes/_mapping
+
+
+GET bowled_over_notes/_search
+{
+  "query": {
+    "term": {"unstructured": "find new investors"}
+  }
+}
+
+GET bowled_over_notes/_search
+{
+  "query": {
+    "term": {"unstructured.reminder": "find new investors"}
+  }
+}
+
+

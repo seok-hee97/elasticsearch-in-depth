@@ -1,0 +1,54 @@
+DELETE bowled_over_games
+# create a simple document
+PUT /bowled_over_games/_doc/1
+{
+  "date": "2021-02-04",
+  "league": "Friday Night Rockstars",
+  "bowler_name": "Ron California",
+  "scores":[211]
+}
+
+POST /bowled_over_games/_update/1
+{
+ "script" : {
+   "source": """
+   if (ctx._source.bartab == null) { 
+     ctx._source.bartab = params.cost 
+   } else {
+     ctx._source.bartab += params.cost 
+   }""",
+   "lang": "painless",
+   "params": {
+     "cost": 3.99
+   }
+ }
+}
+
+GET /bowled_over_games/_source/1
+
+POST _scripts/update-bartab
+{
+  "script": {
+    "lang": "painless",
+    "source": """
+      if (ctx._source.bartab == null) { 
+        ctx._source.bartab = params.cost 
+      } else {
+        ctx._source.bartab += params.cost 
+      }
+    """
+  }
+}
+
+GET _scripts/update-bartab
+
+
+POST /bowled_over_games/_update/1
+{
+ "script" : {
+    "id": "update-bartab",
+   "params": {
+     "cost": 3.99
+   }
+ }
+}

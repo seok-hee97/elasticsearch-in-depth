@@ -1,0 +1,89 @@
+DELETE bowled_over_games
+
+PUT /bowled_over_games/_doc/1
+{
+  "date": "2021-02-04",
+  "league": "Friday Night Rockstars",
+  "bowler_name": "Ron California",
+  "scores":[211]
+}
+
+GET /bowled_over_games/_mapping
+
+GET /bowled_over_games/_source/1
+
+POST /bowled_over_games/_update/1
+{
+  "script": {
+    "source": "ctx._source.scores.add(params.score)",
+    "lang": "painless",
+    "params": {
+      "score": 151
+    }
+  }
+}
+GET /bowled_over_games/_source/1
+
+POST /bowled_over_games/_update/1
+{
+ "script" : {
+   "source": """
+   if (ctx._source.bartab == null) { 
+     ctx._source.bartab = params.cost 
+   } else {
+     ctx._source.bartab += params.cost 
+   }""",
+   "lang": "painless",
+   "params": {
+     "cost": 3.99
+   }
+ }
+}
+
+GET bowled_over_games/_doc/1
+
+POST /bowled_over_games/_update/1
+{
+ "script" : {
+   "source": "if (ctx._source.bartab == null) { ctx._source.bartab= params.cost } else {ctx._source.bartab += params.cost }",
+   "lang": "painless",
+   "params": {
+     "cost": 3.99
+   }
+ }
+}
+
+GET bowled_over_games/_doc/1
+
+POST /bowled_over_games/_update/1
+{
+ "script" : {
+   "source": """
+   if (ctx._source.bartab == null) { 
+     ctx._source.bartab = params.cost 
+     
+   } else {
+       ctx._source.bartab += params.cost 
+     }
+     """,
+   "lang": "painless",
+   "params": {
+     "cost": 3.99
+   }
+ },
+ "if_seq_no" : 5,
+ "if_primary_term": 1
+}
+
+POST /bowled_over_games/_update/1
+{
+ "script" : {
+   "source": "if (ctx._source.bartab == null) { ctx._source.bartab= params.cost } else {ctx._source.bartab += params.cost }",
+   "lang": "painless",
+   "params": {
+     "cost": 3.99
+   }
+ },
+ "if_seq_no" : 3,
+ "if_primary_term": 1
+}

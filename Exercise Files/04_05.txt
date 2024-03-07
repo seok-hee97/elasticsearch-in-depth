@@ -1,0 +1,60 @@
+PUT /bowled_over_games/_doc/1
+{
+  "date": "2021-02-04",
+  "league": "Friday Night Rockstars",
+  "bowler_name": "Ron California",
+  "scores":[211],
+  "bartab": 9.25
+}
+
+
+POST bowled_over_games/_update_by_query?wait_for_completion=false
+{
+  "script": {
+    "source": """
+    ctx._source.message = 'we payed your tab of ' + ctx._source.bartab;
+    ctx._source.bartab=0;""",
+    "lang": "painless"
+  },
+   "query": {
+    "bool": {
+      "must": [
+        { 
+          "range": {
+            "scores": {
+              "gte": 200
+            }
+          }
+        },
+        {
+          "range": {
+            "date": {
+              "gte": "2021-02-01",
+              "lte": "2021-02-29"
+            }
+          }
+        },
+        {
+          "range": {
+            "bartab": {
+              "lte": 10
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+#get all tasks
+GET _tasks/
+
+#get a specific task
+GET _tasks/HxIadmIZRTyl0JeK6z3ttg:512501
+
+#cancel a running task
+POST _tasks/HxIadmIZRTyl0JeK6z3ttg:512501/_cancel
+
+
+#delete a task
+DELETE .tasks/task/HxIadmIZRTyl0JeK6z3ttg:512501

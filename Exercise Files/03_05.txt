@@ -1,0 +1,85 @@
+
+PUT _ilm/policy/fast-ttl-policy
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "actions": {
+          "rollover": {
+            "max_age": "1m"
+            
+          },
+          "set_priority": {
+            "priority": 100
+          }
+        },
+        "min_age": "0ms"
+      },
+      "delete": {
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}
+
+PUT _index_template/fast-ttl-template
+{
+  "template": {
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": "fast-ttl-policy"
+        }
+      }
+    },
+    "mappings": {
+      "dynamic": true,
+      "numeric_detection": false,
+      "date_detection": true,
+      "dynamic_date_formats": [
+        "strict_date_optional_time",
+        "yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z"
+      ],
+      "_source": {
+        "enabled": true,
+        "includes": [],
+        "excludes": []
+      },
+      "_routing": {
+        "required": false
+      }
+    }
+  },
+  "index_patterns": [
+    "fast-ttl-*"
+  ],
+  "data_stream": {}
+}
+
+
+PUT _cluster/settings
+{
+  "transient": {
+    "indices.lifecycle.poll_interval": "15s"
+  }
+}
+
+POST fast-ttl-ilm/_doc
+{
+  "@timestamp": "2021-01-11",
+  "x": "something"
+}
+
+POST fast-ttl-ilm/_doc
+{
+  "@timestamp": "2021-01-11",
+  "x": "something else"
+}
+
+
+GET _cat/indices/fast-ttl-ilm?v
+
+
+GET fast-ttl-ilm/_search

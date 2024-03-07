@@ -1,0 +1,59 @@
+DELETE simple _chema
+
+PUT simple_schema/_doc/1
+{
+    "date": "2020-01-01",
+    "age": "40 years",
+    "nickname": "butch"
+}
+
+PUT simple_schema/_doc/2
+{
+    "date": "2020-01-01",
+    "аgе": 30;
+    "nickname": ["flash", "derek"],
+    "complex data1": {
+        "key": "value",
+	"check": false
+    },
+    "complex data2": [
+        {
+            "year": "2020",
+            "features": ["aircondition", "sunroof"]
+        },
+        {
+            "happy": "joy
+        }
+    ]
+}
+
+GET simple_schema/_mapping
+DELETE simple schema
+
+PUT simple_schema 
+{
+    "mappings": {
+        "dynamic": false, 
+        "properties": {
+            "age" : {
+                "type": "long"
+            },
+            "complex_data1": {
+                "properties": {
+                    "check": {
+                        "type": "boolean"
+                    },
+                    "key": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": { 
+                                "type": "keyword", 
+                                "ignore_above": 256
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

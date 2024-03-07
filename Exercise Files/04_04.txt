@@ -1,0 +1,27 @@
+DELETE votes
+PUT votes/_doc/1
+{
+  "hamburger_heaven": 0,
+  "pizza_r_us": 0,
+  "unholy_wings": 0
+}
+
+GET votes/_doc/1
+
+POST votes/_update/1?if_seq_no=0&if_primary_term=1
+{
+  "doc": {
+    "hamburger_heaven": 1
+  }
+}
+
+
+GET votes/_doc/1
+
+
+POST votes/_update/1?if_seq_no=1&if_primary_term=1
+{
+  "doc": {
+    "hamburger_heaven": 2
+  }
+}

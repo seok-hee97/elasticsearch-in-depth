@@ -1,0 +1,79 @@
+DELETE lanes 
+PUT lanes 
+{
+  "mappings": {
+    "properties" : {
+      "id" : {
+        "type": "keyword"
+      },
+      "join_field": {
+        "type": "join",
+        "relations" : {
+          "biz_name": "arcade_machine" 
+        }
+      }
+    }
+  }
+}
+
+PUT lanes/_doc/1
+{ 
+  "id": "1",
+  "text": "White Plains Post Bowl",
+  "join_field": {
+    "name": "biz_name"
+  }
+}
+
+PUT lanes/_doc/3?routing=1
+{
+  "id": "3",
+  "text": "Street fighter 2",
+   "join_field": {
+    "name": "arcade_machine",
+    "parent": "1"
+  }
+  
+}
+
+PUT lanes/_doc/4?routing=1
+{
+  "id": "4",
+  "text": "The grabby claw thing",
+   "join_field": {
+    "name": "arcade_machine",
+    "parent": "1"
+  }
+  
+}
+
+#arcade machines in parent
+GET lanes/_search
+{
+  "query": {
+    "parent_id": {
+      "type": "arcade_machine",
+      "id": "1"
+      
+    }
+
+  }
+}
+
+#arcade machines in parent
+GET lanes/_search
+{
+  "query": {
+    "has_child": {
+      "type": "arcade_machine",
+      "query": {
+        "term": {
+          "text.keyword": {
+            "value": "Street fighter 2"
+          }
+        }
+      }
+    }
+
+  }
+}

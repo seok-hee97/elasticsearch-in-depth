@@ -1,0 +1,61 @@
+DELETE bowled_over_artist_guild
+PUT /bowled_over_artist_guild/_doc/1
+{ 
+  "Author": "Nathaniel Bowlmorn", 
+  "date" : "2020-01-01",
+  "title" : "It's down to the last frame",
+  "passage" : """As I distinct remember,
+  I was bowling in december, 
+  and every separate strikeball, 
+  left a defiant 10 pin standing on the deck  
+  early i wish to bowl tommorow"""   
+} 
+
+PUT /bowled_over_artist_guild/_doc/2
+{ 
+  "Author": "Whiph Onpin", 
+  "date" : "2020-01-02",
+  "title" : "o Captain, team captain",
+  "passage" : """O Captain! team captain! our painful season is done; 
+Our team has weather'd every split, the place we sought is won; 
+The bowling dinner is near, the awards I hear, the people all cheering, 
+"""   
+}
+
+POST bowled_over_artist_guild/_pit?keep_alive=10m
+POST _search
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  },
+  "pit": {
+    "id": "g-azAwEYYm93bGVkX292ZXJfYXJ0aXN0X2d1aWxkFmdaU24wdWlDUW1TUGxQY1QzaW1zcVEAFkh4SWFkbUlaUlR5bDBKZUs2ejN0dGcAAAAAAAABIroWVE1PM1Y5YzlSUXVKLWxjX2dmaUI3QQABFmdaU24wdWlDUW1TUGxQY1QzaW1zcVEAAA=="
+    ,"keep_alive": "10m"
+  },
+  "sort": [ 
+    {"_shard_doc": "desc"}
+  ]
+}
+
+POST _search
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  },
+  "pit": {
+    "id": "g-azAwEYYm93bGVkX292ZXJfYXJ0aXN0X2d1aWxkFmdaU24wdWlDUW1TUGxQY1QzaW1zcVEAFkh4SWFkbUlaUlR5bDBKZUs2ejN0dGcAAAAAAAABIroWVE1PM1Y5YzlSUXVKLWxjX2dmaUI3QQABFmdaU24wdWlDUW1TUGxQY1QzaW1zcVEAAA=="
+  },
+  "search_after": [
+    1
+    ],
+  "sort": [ 
+    {"_shard_doc": "desc"}
+  ]
+}
+
+DELETE /_pit
+{
+  "id": "g-azAwEYYm93bGVkX292ZXJfYXJ0aXN0X2d1aWxkFmdaU24wdWlDUW1TUGxQY1QzaW1zcVEAFkh4SWFkbUlaUlR5bDBKZUs2ejN0dGcAAAAAAAABIroWVE1PM1Y5YzlSUXVKLWxjX2dmaUI3QQABFmdaU24wdWlDUW1TUGxQY1QzaW1zcVEAAA=="
+}

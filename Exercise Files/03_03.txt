@@ -1,0 +1,277 @@
+DELETE bowled_over_team_scores
+
+PUT bowled_over_team_scores
+{
+  
+    "mappings" : {
+      "properties" : {
+        "date" : {
+          "type" : "date"
+        },
+        "league_name" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "scores" : {
+          "type": "nested",
+          "properties" : {
+            "bowler" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            },
+            "game" : {
+              "type" : "long"
+            },
+            "score" : {
+              "type" : "long"
+            },
+            "team_name" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+PUT /bowled_over_team_scores/_doc/1
+{ 
+  "league_name": "friday night lights", 
+  "date" : "2020-01-01",
+  "scores" : [
+     { 
+       "game": 1,
+       "team_name" : "strike force",
+       "bowler": "bob",
+       "score": 203
+     },
+     { 
+       "game": 2,
+       "team_name" : "strike force",
+       "bowler": "bob",
+       "score": 204
+     },
+     { 
+       "game": 1,
+       "team_name" : "strike force",
+       "bowler": "sara",
+       "score": 177
+     },
+     { "game": 2,
+       "team_name" : "strike force",
+       "bowler": "sara",
+       "score": 176
+     },
+     { 
+       "game": 1,
+       "team_name" : "bowling turkeys",    
+       "bowler": "john",
+       "score": 160
+     },
+     { 
+       "game": 2,
+       "team_name" : "bowling turkeys", 
+       "bowler": "john",
+       "score": 164
+     },
+     { 
+       "game": 1,
+       "team_name" : "bowling turkeys",    
+       "bowler": "ted",
+        "score": 121
+     },
+     { 
+       "game": 2,
+       "team_name" : "bowling turkeys", 
+       "bowler": "ted",
+        "score": 241
+     }
+  ]
+}        
+
+
+PUT /bowled_over_team_scores/_doc/2
+{ 
+  "league_name": "friday night lights", 
+  "date" : "2020-01-08",
+  "scores" : [
+     { 
+       "game": 1,
+       "team_name" : "strike force",
+       "bowler": "bob",
+       "score": 233
+     },
+     { 
+       "game": 2,
+       "team_name" : "strike force",
+       "bowler": "bob",
+       "score": 234
+     },
+     { 
+       "game": 1,
+       "team_name" : "strike force",
+       "bowler": "sara",
+       "score": 170
+     },
+     { "game": 2,
+       "team_name" : "strike force",
+       "bowler": "sara",
+       "score": 199
+     },
+     { 
+       "game": 1,
+       "team_name" : "bowling turkeys",    
+       "bowler": "john",
+       "score": 170
+     },
+     { 
+       "game": 2,
+       "team_name" : "bowling turkeys", 
+       "bowler": "john",
+       "score": 174
+     },
+     { 
+       "game": 1,
+       "team_name" : "bowling turkeys",    
+       "bowler": "ted",
+        "score": 120
+     },
+     { 
+       "game": 2,
+       "team_name" : "bowling turkeys", 
+       "bowler": "ted",
+        "score": 200
+     }
+  ]
+}        
+
+
+
+
+GET bowled_over_team_scores/_search
+{
+  "query": {
+    "nested": {
+      "path": "scores",
+      "query": {
+        "bool": {
+          "must": [
+            { "match": { "scores.team_name": "strike force" }},
+            { "match": { "scores.bowler":  "bob" }}
+          ]
+        }
+      }
+    }
+  }
+  ,
+  "aggs": {
+    "unique_ids": {
+      "terms": {
+        "field" : "date"
+      }
+    },
+    "the_aveage" : {
+      "avg": {
+        "field": "date"
+      }
+    }
+  }
+  , "_source": false
+}
+
+GET bowled_over_team_scores/_search
+{
+  "aggs": {
+    "scores": {
+      "nested": {
+        "path": "scores"
+      },
+      "aggs": {
+        "min_score": {
+          "min": {
+            "field": "scores.score"
+          }
+        }
+      }
+    }
+  }
+  , "_source": false
+}
+
+GET _sql?format=txt
+{
+  "query": """
+  SELECT league_name,count(1)  FROM "bowled_over_team_scores" group by league_name
+  """
+}
+
+GET _sql/translate
+{
+  "query": """
+  SELECT league_name,count(1)  FROM "bowled_over_team_scores" group by league_name
+  """
+}
+
+
+
+GET bowled_over_team_scores/_search
+{
+  "size" : 0,
+  "_source" : false,
+  "aggregations" : {
+    "groupby" : {
+      "composite" : {
+        "size" : 1000,
+        "sources" : [
+          {
+            "660ef3c6" : {
+              "terms" : {
+                "field" : "league_name.keyword",
+                "missing_bucket" : true,
+                "order" : "asc"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+GET bowled_over_team_scores/_search
+{
+  "aggs": {
+    "scores": {
+      "nested": {
+        "path": "scores"
+      },
+      "aggs": {
+        "thename": {
+          "histogram": {
+            "field": "scores.score",
+            "interval": 50
+          }
+        }
+      }
+    }
+  }
+  , "_source": false
+}
+
